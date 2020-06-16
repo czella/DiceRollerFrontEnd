@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container, Row, Col, Button } from 'react-bootstrap';
+import {find} from 'lodash';
 import UnitRowContainer from '../containers/UnitRowContainer';
 import { useLoader } from '../hooks/useLoader';
 
@@ -9,6 +10,8 @@ const Form = props => {
   const [shouldFetch, setShouldFetch] = useState(false);
   const [result, setResult] = useState([]);
   const [resultBuffer, setResultBuffer] = useState([]);
+  const [values, setValues] = useState({});
+  const [hasModifier, setHasModifier] = useState(false);
   const [isLoading, increaseLoader, decreaseLoader] = useLoader();
   const handleSubmit = (event) => {
     setResultBuffer([]);
@@ -23,6 +26,15 @@ const Form = props => {
         (result) => {
           decreaseLoader();
           setUnitTypes(result);
+          const fetchedValues = {};
+          result.forEach(unitType => fetchedValues[unitType.name] = {
+            options: unitType.units.map(unit => ({label: unit.name, value: unit.id})),
+            selectedOption: unitType.units.map(unit => ({label: unit.name, value: unit.id}))[0],
+            combat: unitType.units[0] ? unitType.units[0].combat : 0,
+            modifier: 0,
+            name: unitType.name,
+          });
+          setValues(fetchedValues);
         },
         (error) => {
           decreaseLoader();
@@ -55,13 +67,25 @@ const Form = props => {
             </Col>
           </Row>
           ))}
-          <h2>Total hits: {totalHits}</h2>
+          {result.length > 0 && (<h2>Total hits: {totalHits}</h2>)}
         </div>
       );
     }
   };
   const addToResult = newResult => {
     resultBuffer.push(newResult);
+  };
+  const button = {
+    width: 150,
+  };
+  const handleSetValue = (type, prop, value) => {
+    setValues({
+      ...values,
+      [type] : {
+        ...values[type],
+        [prop]: value,
+      },
+    })
   };
   return (
     <Container>
@@ -73,9 +97,14 @@ const Form = props => {
           <Col><h2>Combat</h2></Col>
           <Col><h2>Count</h2></Col>
           <Col><h2>Modifier</h2></Col>
+          {console.log(values)}
         </Row>
-        {unitTypes.map(unitType =><UnitRowContainer addToResult={addToResult} shouldFetch={shouldFetch} unitType={unitType} increaseLoader={increaseLoader} decreaseLoader={decreaseLoader} />)}
-        <input type="submit" value="Submit" />
+        {unitTypes.map(unitType =><UnitRowContainer values={values[unitType.name]} setValues={handleSetValue} addToResult={addToResult} shouldFetch={shouldFetch} unitType={unitType} increaseLoader={increaseLoader} decreaseLoader={decreaseLoader} hasModifier={hasModifier} />)}
+        <Row>
+          <Col><Button style={button} type="submit" value="Submit">Roll</Button></Col>
+          <Col><Button onClick={() => setHasModifier(true)}>Add +1 modifier</Button></Col>
+          <Col><Button onClick={() => setHasModifier(false)}>Remove modifiers</Button></Col>
+        </Row>
         {getResult()}
       </form>
     </Container>

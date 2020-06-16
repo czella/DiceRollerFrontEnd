@@ -3,7 +3,7 @@ import {find} from 'lodash';
 import UnitRow from '../components/UnitRow';
 
 const UnitRowContainer = props => {
-  const {addToResult, unitType, shouldFetch, increaseLoader, decreaseLoader} = props;
+  const {addToResult, unitType, shouldFetch, increaseLoader, decreaseLoader, hasModifier, values, setValues} = props;
   const [options, setOptions] = useState([]);
   const [selectedOption, setSelectedOption] = useState(null);
   const [count, setCount] = useState(0);
@@ -20,6 +20,9 @@ const UnitRowContainer = props => {
       setCombat(find(unitType.units, {name: selectedOption.label}).combat);
     }
   }, [selectedOption])
+  useEffect(() => {
+    setModifier(hasModifier ? 1 : 0);
+  }, [hasModifier]);
   const handleSelectChange = selected => {
     setSelectedOption(selected);
   };
@@ -36,6 +39,7 @@ const UnitRowContainer = props => {
     }
     return params
   };
+  console.log(values);
   useEffect(() => {
     if (shouldFetch && count != 0 && combat !== 0) {
       increaseLoader();
@@ -53,7 +57,7 @@ const UnitRowContainer = props => {
     };
   }, [shouldFetch]);
   return (
-    <UnitRow unitType={unitType} handleSelectChange={handleSelectChange} selectedOption={selectedOption} options={options} combat={combat} setCombat={setCombat} count={count} setCount={setCount} modifier={modifier} setModifier={setModifier} hasCombatInput={['Flagship', 'Space Cannon'].indexOf(unitType.name) !== -1} />
+    <UnitRow values={values} setValues={setValues} unitType={unitType} handleSelectChange={handleSelectChange} selectedOption={selectedOption} options={options} combat={combat} setCombat={setCombat} count={count} setCount={setCount} modifier={modifier} setModifier={setModifier} hasCombatInput={['Flagship', 'Space Cannon'].indexOf(unitType.name) !== -1} />
   );
 };
 
