@@ -18,7 +18,6 @@ const DiceRoller = (props) => {
   return (
     <div>
       <p>DiceRoller</p>
-      {console.log(units)}
     </div>
   );
 };
