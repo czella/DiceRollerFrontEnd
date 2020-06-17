@@ -14,7 +14,7 @@ const UnitRow = props => {
       {console.log(values)}
       <Col>
         {/*{unitType.units.length > 1 && (<Select value={selectedOption} onChange={handleSelectChange} options={options}/>)}*/}
-        {values.units.length > 1 && (<Select value={values.selectedOption} onChange={handleSelectChange} options={values.options}/>)}
+        {values.options.length > 1 && (<Select value={values.selectedOption} onChange={handleSelectChange} options={values.options}/>)}
       </Col>
       <Col>
         {hasCombatInput && (<input type="number" value={values.combat} onChange={event => setValues(values.name, "combat", event.target.value)} />)}

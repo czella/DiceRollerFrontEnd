@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
-import {find} from 'lodash';
+import {isEmpty} from 'lodash';
 import UnitRowContainer from '../containers/UnitRowContainer';
 import { useLoader } from '../hooks/useLoader';
 
@@ -14,9 +14,19 @@ const Form = props => {
   const [hasModifier, setHasModifier] = useState(false);
   const [isLoading, increaseLoader, decreaseLoader] = useLoader();
   const handleSubmit = (event) => {
-    setResultBuffer([]);
+    // setResultBuffer([]);
     event.preventDefault();
-    setShouldFetch(true);
+    // setShouldFetch(true);
+    console.log(getUrls());
+    Promise.all(getUrls().map(url =>
+    fetch(url)
+    ))
+    .then(res => {
+     const responses = res.map(response => response.json())
+     return Promise.all(responses)
+    })
+    .then(responses => console.log(responses)
+    )
   };
   useEffect(() => {
     increaseLoader();
@@ -28,12 +38,14 @@ const Form = props => {
           setUnitTypes(result);
           const fetchedValues = {};
           result.forEach(unitType => fetchedValues[unitType.name] = {
-            options: unitType.units.map(unit => ({label: unit.name, value: unit.id})),
+            options: unitType.units.map(unit => ({label: unit.name, value: unit.id, combat: unit.combat})),
             selectedOption: unitType.units.map(unit => ({label: unit.name, value: unit.id}))[0],
             combat: unitType.units[0] ? unitType.units[0].combat : 0,
             modifier: 0,
             name: unitType.name,
+            count: 0,
           });
+          console.log(fetchedValues, 'fetched');
           setValues(fetchedValues);
         },
         (error) => {
@@ -87,6 +99,31 @@ const Form = props => {
       },
     })
   };
+  const getParams = type => {
+    let params = '';
+    if (values[type].selectedOption) {
+      params += `id=${values[type].selectedOption.value}&`
+    }
+    if (values[type].count !== 1) {
+      params += `count=${values[type].count}&`
+    }
+    if (values[type].modifier !== 0) {
+      params += `modifier=${values[type].modifier}&`
+    }
+    return params
+  };
+  const getUrls = () => {
+    const urls = [];
+    Object.keys(values).forEach(unittype => {
+      if (values[unittype].count > 0) {
+        urls.push(`http://localhost:8080/roll/${unittype.replace(/\s/g, '').toLowerCase()}?${getParams(unittype)}`)
+      }
+    });
+    return urls;
+  };
+  if (isEmpty(values)) {
+    return null;
+  }
   return (
     <Container>
       {error && (<div>There was an error!</div>)}

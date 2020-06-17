@@ -24,7 +24,8 @@ const UnitRowContainer = props => {
     setModifier(hasModifier ? 1 : 0);
   }, [hasModifier]);
   const handleSelectChange = selected => {
-    setSelectedOption(selected);
+    setValues(values.name, "selectedOption", selected);
+    setValues(values.name, "combat", selected.combat);
   };
   const getParams = () => {
     let params = '';
@@ -39,7 +40,7 @@ const UnitRowContainer = props => {
     }
     return params
   };
-  console.log(values);
+  console.log(values, 'container');
   useEffect(() => {
     if (shouldFetch && count != 0 && combat !== 0) {
       increaseLoader();
