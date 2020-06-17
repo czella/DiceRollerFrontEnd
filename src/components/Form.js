@@ -45,25 +45,48 @@ const Form = props => {
     result.forEach(subResult => totalHits += subResult.hits);
     return (
       <div>
+        {result.length > 0 && (
+          <div>
+            <Row>
+              <Col>
+                <h3>Unit</h3>
+              </Col>
+              <Col>
+                <h3>Rolls</h3>
+              </Col>
+              <Col>
+                <h3>Hits</h3>
+              </Col>
+            </Row>
+            <div className="separator" />
+          </div>
+        )}
         {result.map(subResult => (
         <Row>
           <Col>
-            <h3>{subResult.unitName}</h3>
+            <h3 style={{textAlign: 'left'}}>{subResult.unitName}</h3>
           </Col>
           <Col>
-            <p>Rolls: {subResult.rolls.join(', ')}</p>
+            <p>{subResult.rolls.join(', ')}</p>
           </Col>
           <Col>
-            <p>Hits: {subResult.hits}</p>
+            <p>{subResult.hits}</p>
           </Col>
         </Row>
         ))}
+        {result.length > 0 && (<div className="separator" />)}
         {result.length > 0 && (<h2>Total hits: {totalHits}</h2>)}
       </div>
     );
   };
-  const button = {
-    width: 150,
+  const buttonStyle = {
+    width: 200,
+    backgroundColor: 'rgba(0,0,10,0.5)',
+    borderColor: 'orange',
+    borderWidth: 2,
+    borderRadius: 5,
+    color: 'orange',
+    fontSize: 20,
   };
   const handleSetValue = (type, prop, value) => {
     const newValues = {
@@ -126,6 +149,7 @@ const Form = props => {
     <Container>
       {error && (<div>There was an error!</div>)}
       <form onSubmit={handleSubmit}>
+        <div className="separator" />
         <Row>
           <Col><h2>Type</h2></Col>
           <Col><h2>Unit</h2></Col>
@@ -133,13 +157,15 @@ const Form = props => {
           <Col><h2>Count</h2></Col>
           <Col><h2>Modifier</h2></Col>
         </Row>
+        <div className="separator" />
         {Object.keys(values).map(unitType =><UnitRow values={values[unitType]} setValues={handleSetValue} hasCombatInput={['Flagship', 'Space Cannon'].indexOf(values[unitType].name) !== -1} />)}
-        <Row>
-          <Col><Button style={button} type="submit" value="Submit">Roll</Button></Col>
-          <Col><Button onClick={() => setModifiers(1)}>Add +1 modifier</Button></Col>
-          <Col><Button onClick={() => setModifiers(0)}>Remove modifiers</Button></Col>
-          <Col><Button onClick={() => clear()}>Clear all</Button></Col>
+        <Row style={{marginTop: 50, marginBottom: 30}}>
+          <Col><Button style={buttonStyle} type="submit" value="Submit">Roll</Button></Col>
+          <Col><Button style={buttonStyle} onClick={() => setModifiers(1)}>Add +1 modifier</Button></Col>
+          <Col><Button style={buttonStyle} onClick={() => setModifiers(0)}>Remove modifiers</Button></Col>
+          <Col><Button style={buttonStyle} onClick={() => clear()}>Clear all</Button></Col>
         </Row>
+        <div className="separator" />
         {getResult()}
       </form>
     </Container>
