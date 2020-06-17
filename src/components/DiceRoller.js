@@ -17,7 +17,7 @@ const DiceRoller = (props) => {
   }, []);
   return (
     <div>
-      <p>DiceRoller</p>
+      <h1>Dice Roller</h1>
     </div>
   );
 };
