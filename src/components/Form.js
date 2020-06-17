@@ -27,7 +27,7 @@ const Form = props => {
           const fetchedValues = {};
           result.forEach(unitType => fetchedValues[unitType.name] = {
             options: unitType.units.map(unit => ({label: unit.name, value: unit.id, combat: unit.combat})),
-            selectedOption: unitType.units.map(unit => ({label: unit.name, value: unit.id}))[0],
+            selectedOption: unitType.units.map(unit => ({label: unit.name, value: unit.id, combat: unit.combat}))[0],
             combat: unitType.units[0] ? unitType.units[0].combat : 0,
             modifier: 0,
             name: unitType.name,
@@ -111,6 +111,17 @@ const Form = props => {
     Object.keys(newValues).forEach(unitType => newValues[unitType].modifier = value);
     setValues(newValues);
   };
+  const clear = () => {
+    const newValues = {...values};
+    Object.keys(newValues).forEach(unitType => {
+      newValues[unitType].modifier = 0;
+      newValues[unitType].count = 0;
+      if (newValues[unitType].options.length > 0) {
+        newValues[unitType].selectedOption = newValues[unitType].options[0];
+      }
+    });
+    setValues(newValues);
+  };
   return (
     <Container>
       {error && (<div>There was an error!</div>)}
@@ -127,6 +138,7 @@ const Form = props => {
           <Col><Button style={button} type="submit" value="Submit">Roll</Button></Col>
           <Col><Button onClick={() => setModifiers(1)}>Add +1 modifier</Button></Col>
           <Col><Button onClick={() => setModifiers(0)}>Remove modifiers</Button></Col>
+          <Col><Button onClick={() => clear()}>Clear all</Button></Col>
         </Row>
         {getResult()}
       </form>
