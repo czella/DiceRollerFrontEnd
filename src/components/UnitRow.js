@@ -16,7 +16,7 @@ const UnitRow = props => {
   return (
     <Row>
       <Col>
-        <h3 style={{textAlign: 'left'}}>
+        <h3 style={{textAlign: 'left', lineHeight: '38px'}}>
           {values.name}
         </h3>
       </Col>
@@ -41,7 +41,7 @@ const UnitRow = props => {
       </Col>
       <Col>
         {hasCombatInput && (<input style={numberInputStyle} type="number" value={values.combat} onChange={event => setValues(values.name, "combat", event.target.value)} />)}
-        {!hasCombatInput && (<p style={{fontWeight: 'bold', lineHeight: '38px', marginBottom: 0}}>{values.combat}</p>)}
+        {!hasCombatInput && (<p style={{fontWeight: 'bold', lineHeight: '38px', marginBottom: 0, fontSize: '18px'}}>{values.combat}</p>)}
       </Col>
       <Col>
         <input style={numberInputStyle}  type="number" value={values.count} onChange={event => setValues(values.name, "count", event.target.value)} />

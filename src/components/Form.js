@@ -2,22 +2,30 @@ import React, {useEffect, useState} from 'react';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import {isEmpty} from 'lodash';
 import UnitRow from "./UnitRow";
+import dice from '../static/dice.gif'
 
 const Form = props => {
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState([]);
   const [values, setValues] = useState({});
   const handleSubmit = (event) => {
     event.preventDefault();
-    Promise.all(getUrls().map(url =>
-    fetch(url)
-    ))
-    .then(res => {
-     const responses = res.map(response => response.json())
-     return Promise.all(responses)
-    })
-    .then(responses => setResult(responses)
-    )
+    setLoading(true);
+    setTimeout(() => {
+      Promise.all(getUrls().map(url =>
+        fetch(url)
+      ))
+        .then(res => {
+          const responses = res.map(response => response.json())
+          return Promise.all(responses)
+        })
+        .then(responses => {
+          setResult(responses);
+          setLoading(false);
+        }
+        )
+    }, 1000);
   };
   useEffect(() => {
     fetch("http://localhost:8080/unittypes")
@@ -43,6 +51,9 @@ const Form = props => {
   const getResult = () => {
     let totalHits = 0;
     result.forEach(subResult => totalHits += subResult.hits);
+    if (loading) {
+      return <img style={{maxHeight: '100px'}} src={dice} alt="loading..." />;
+    }
     return (
       <div>
         {result.length > 0 && (
@@ -64,13 +75,13 @@ const Form = props => {
         {result.map(subResult => (
         <Row>
           <Col>
-            <h3 style={{textAlign: 'left'}}>{subResult.unitName}</h3>
+            <h3 style={{textAlign: 'left', lineHeight: '38px'}}>{subResult.unitName}</h3>
           </Col>
           <Col>
-            <p>{subResult.rolls.join(', ')}</p>
+            <p style={{fontWeight: 'bold', lineHeight: '38px', marginBottom: 0, fontSize: '18px'}}>{subResult.rolls.join(', ')}</p>
           </Col>
           <Col>
-            <p>{subResult.hits}</p>
+            <p style={{fontWeight: 'bold', lineHeight: '38px', marginBottom: 0, fontSize: '18px'}}>{subResult.hits}</p>
           </Col>
         </Row>
         ))}
@@ -82,10 +93,9 @@ const Form = props => {
   const buttonStyle = {
     width: 200,
     backgroundColor: 'rgba(0,0,10,0.5)',
-    borderColor: 'orange',
+    color: 'white',
     borderWidth: 2,
     borderRadius: 5,
-    color: 'orange',
     fontSize: 20,
   };
   const handleSetValue = (type, prop, value) => {
@@ -160,10 +170,10 @@ const Form = props => {
         <div className="separator" />
         {Object.keys(values).map(unitType =><UnitRow values={values[unitType]} setValues={handleSetValue} hasCombatInput={['Flagship', 'Space Cannon'].indexOf(values[unitType].name) !== -1} />)}
         <Row style={{marginTop: 50, marginBottom: 30}}>
-          <Col><Button style={buttonStyle} type="submit" value="Submit">Roll</Button></Col>
-          <Col><Button style={buttonStyle} onClick={() => setModifiers(1)}>Add +1 modifier</Button></Col>
-          <Col><Button style={buttonStyle} onClick={() => setModifiers(0)}>Remove modifiers</Button></Col>
-          <Col><Button style={buttonStyle} onClick={() => clear()}>Clear all</Button></Col>
+          <Col><Button style={{...buttonStyle, borderColor: 'orangered'}} type="submit" value="Submit">Roll</Button></Col>
+          <Col><Button style={{...buttonStyle, borderColor: 'orange'}} onClick={() => setModifiers(1)}>Add +1 modifier</Button></Col>
+          <Col><Button style={{...buttonStyle, borderColor: 'gold'}} onClick={() => setModifiers(0)}>Remove modifiers</Button></Col>
+          <Col><Button style={{...buttonStyle, borderColor: 'yellow'}} onClick={() => clear()}>Clear all</Button></Col>
         </Row>
         <div className="separator" />
         {getResult()}
