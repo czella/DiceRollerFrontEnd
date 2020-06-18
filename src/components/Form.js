@@ -9,23 +9,39 @@ const Form = props => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState([]);
   const [values, setValues] = useState({});
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      Promise.all(getUrls().map(url =>
-        fetch(url)
-      ))
-        .then(res => {
-          const responses = res.map(response => response.json())
-          return Promise.all(responses)
+    const requestBody = [];
+    Object.keys(values).forEach(value => {
+      const unitType = values[value];
+      if (unitType.count > 0) {
+        requestBody.push({
+          name: unitType.name,
+          combat: unitType.combat,
+          count: unitType.count,
+          modifier: unitType.modifier,
         })
-        .then(responses => {
-          setResult(responses);
-          setLoading(false);
-        }
-        )
-    }, 1000);
+      }
+    })
+    setTimeout(() => fetch("http://localhost:8080/roll/combined", {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, *cors, same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+        'Content-Type': 'application/json'
+        // 'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(requestBody) // body data type must match "Content-Type" header
+    }).then(response => response.json().then(
+      parsed => {
+        setResult(parsed);
+        setLoading(false);
+      }
+    )), 900);
   };
   useEffect(() => {
     fetch("http://localhost:8080/unittypes")
@@ -52,7 +68,7 @@ const Form = props => {
     let totalHits = 0;
     result.forEach(subResult => totalHits += subResult.hits);
     if (loading) {
-      return <img style={{maxHeight: '100px'}} src={dice} alt="loading..." />;
+      return <img style={{maxHeight: '100px', animation: 'rotation 1s infinite linear'}} src={dice} alt="loading..." />;
     }
     return (
       <div>
@@ -110,31 +126,6 @@ const Form = props => {
       newValues[type].combat = value.combat;
     }
     setValues(newValues);
-  };
-  const getParams = type => {
-    let params = '';
-    if (values[type].selectedOption) {
-      params += `id=${values[type].selectedOption.value}&`
-    }
-    if (values[type].count !== 1) {
-      params += `count=${values[type].count}&`
-    }
-    if (values[type].modifier !== 0) {
-      params += `modifier=${values[type].modifier}&`
-    }
-    if (['Space Cannon', 'Flagship'].indexOf(type) !== -1) {
-      params += `combat=${values[type].combat}&`
-    }
-    return params
-  };
-  const getUrls = () => {
-    const urls = [];
-    Object.keys(values).forEach(unittype => {
-      if (values[unittype].count > 0) {
-        urls.push(`http://localhost:8080/roll/${unittype.replace(/\s/g, '').toLowerCase()}?${getParams(unittype)}`)
-      }
-    });
-    return urls;
   };
   if (isEmpty(values)) {
     return null;
